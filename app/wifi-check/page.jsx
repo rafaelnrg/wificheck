@@ -21,6 +21,7 @@ export default function WifiCheckPage() {
   const [scoreResult, setScoreResult] = useState(null);
   const [loadingAll, setLoadingAll] = useState(false);
   const [lastRunAt, setLastRunAt] = useState(null);
+  const [showAbout, setShowAbout] = useState(false);
 
   const latencyStats = useMemo(() => {
     if (!latencySamples.length) {
@@ -66,7 +67,7 @@ export default function WifiCheckPage() {
       window.mozRTCPeerConnection;
 
     if (!RTCPeer) {
-      setStunError("WebRTC não suportado neste navegador.");
+      setStunError("WebRTC não é suportado neste navegador.");
       return;
     }
 
@@ -240,6 +241,7 @@ export default function WifiCheckPage() {
         </header>
 
         <div className="grid gap-4 md:grid-cols-2">
+          {/* HTTPS / MITM */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
               <h2 className="wifi-section-title">HTTPS / MITM básico</h2>
@@ -252,11 +254,12 @@ export default function WifiCheckPage() {
             </div>
             <p className="text-sm text-slate-200">{httpsInfo.details}</p>
             <p className="text-xs text-slate-500">
-              Navegadores não expõem o certificado diretamente via JavaScript, então
-              este teste é apenas heurístico.
+              Navegadores não expõem o certificado diretamente via JavaScript,
+              então este teste é apenas heurístico.
             </p>
           </section>
 
+          {/* STUN / IP público */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
               <h2 className="wifi-section-title">IP público (STUN)</h2>
@@ -282,6 +285,7 @@ export default function WifiCheckPage() {
             )}
           </section>
 
+          {/* Latência */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
               <h2 className="wifi-section-title">Latência até o servidor</h2>
@@ -326,6 +330,7 @@ export default function WifiCheckPage() {
             )}
           </section>
 
+          {/* Proxies / headers */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
               <h2 className="wifi-section-title">Proxies / headers</h2>
@@ -333,7 +338,9 @@ export default function WifiCheckPage() {
                 <span className="wifi-chip wifi-badge-warn">Proxy na rota</span>
               )}
               {proxyInfo && !proxyInfo.detected && (
-                <span className="wifi-chip wifi-badge-ok">Nenhum proxy óbvio</span>
+                <span className="wifi-chip wifi-badge-ok">
+                  Nenhum proxy óbvio
+                </span>
               )}
             </div>
 
@@ -374,6 +381,7 @@ export default function WifiCheckPage() {
           </section>
         </div>
 
+        {/* Score de segurança */}
         <section className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
           <h2 className="wifi-section-title mb-2">Score de segurança</h2>
 
@@ -413,7 +421,8 @@ export default function WifiCheckPage() {
           )}
         </section>
 
-        <footer className="border-t border-slate-800 pt-3 text-center text-xs text-slate-500">
+        {/* Rodapé / Sobre o teste */}
+        <footer className="border-t border-slate-800 pt-3 text-center text-xs text-slate-500 space-y-2">
           {lastRunAt && (
             <p className="mb-1">
               Última execução:{" "}
@@ -422,7 +431,74 @@ export default function WifiCheckPage() {
               })}
             </p>
           )}
-          <p>
+
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowAbout((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-600/80 bg-slate-900/80 px-3 py-1 text-[11px] font-medium text-slate-100 shadow-sm shadow-slate-900/60 transition hover:border-sky-400/80 hover:bg-slate-900"
+            >
+              <span className="text-xs" aria-hidden="true">
+                🔍
+              </span>
+              <span>Sobre o teste</span>
+            </button>
+          </div>
+
+          {showAbout && (
+            <div className="mx-auto mt-1 max-w-2xl rounded-lg border border-slate-700/70 bg-slate-900/80 p-3 text-left text-[11px] leading-relaxed text-slate-200">
+              <p className="mb-1 font-semibold text-slate-100">
+                O que é possível detectar via página web
+              </p>
+              <ul className="mb-2 list-disc pl-4">
+                <li>
+                  Se a conexão está usando HTTPS real (e não um MITM com
+                  certificado inválido.
+                </li>
+                <li>
+                  Fingerprint parcial do certificado/rota, o que ajuda a
+                  perceber interceptações ou proxies transparentes.
+                </li>
+                <li>
+                  IP público aproximado do usuário, permitindo comparar com
+                  redes conhecidas.
+                </li>
+                <li>
+                  Latência e comportamento da rota usando chamadas HTTP e
+                  STUN/WebRTC.
+                </li>
+                <li>
+                  Presença de proxies transparentes por meio da análise de
+                  headers como Via e X-Forwarded-*.
+                </li>
+                <li>
+                  Indícios de vazamento de DNS (DNS leak) com requisições para
+                  domínios específicos.
+                </li>
+              </ul>
+
+              <p className="mb-1 font-semibold text-slate-100">
+                O que não é possível apenas pelo browser
+              </p>
+              <ul className="list-disc pl-4">
+                <li>Executar traceroute real a partir do seu dispositivo.</li>
+                <li>
+                  Acessar a tabela de roteamento ou configuração de rede do
+                  sistema.
+                </li>
+                <li>
+                  Detectar diretamente se o Wi‑Fi usa WPA2, WPA3 ou outro
+                  protocolo.
+                </li>
+                <li>
+                  Validar toda a superfície de ataque da rede – aqui fazemos
+                  apenas inferência de risco, não uma auditoria completa.
+                </li>
+              </ul>
+            </div>
+          )}
+
+          <p className="pt-1">
             Este painel fornece apenas indícios de segurança da rota. Não
             substitui ferramentas profissionais de análise de tráfego.
           </p>
