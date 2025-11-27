@@ -3,8 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 
 function formatMs(ms) {
-  if (ms == null) return "-";
+  if (ms == null || Number.isNaN(ms)) return "-";
   return `${ms.toFixed(0)} ms`;
+}
+
+function countryCodeToFlag(code) {
+  if (!code || typeof code !== "string") return "";
+  const upper = code.trim().toUpperCase();
+  if (upper.length !== 2) return "";
+  const codePoints = [...upper].map(
+    (char) => 127397 + char.codePointAt(0)
+  );
+  return String.fromCodePoint(...codePoints);
 }
 
 export default function WifiCheckPage() {
@@ -14,6 +24,7 @@ export default function WifiCheckPage() {
   });
   const [publicIp, setPublicIp] = useState(null);
   const [stunError, setStunError] = useState(null);
+  const [ipInfo, setIpInfo] = useState(null);
   const [latencySamples, setLatencySamples] = useState([]);
   const [latencyRunning, setLatencyRunning] = useState(false);
   const [headersInfo, setHeadersInfo] = useState(null);
@@ -56,10 +67,38 @@ export default function WifiCheckPage() {
     setHttpsInfo({ secure: isSecure, details });
   }
 
+  async function fetchGeoInfo(ip) {
+    try {
+      const response = await fetch(`/api/geo-ip?ip=${encodeURIComponent(ip)}`, {
+        cache: "no-store",
+      });
+      const data = await response.json();
+      if (!response.ok || !data || data.error) {
+        setIpInfo(null);
+        return;
+      }
+
+      const locationParts = [
+        data.country || null,
+        data.region || null,
+        data.city || null,
+      ].filter(Boolean);
+
+      setIpInfo({
+        locationText: locationParts.join(", "),
+        isp: data.isp || null,
+        countryCode: data.countryCode || null,
+      });
+    } catch {
+      setIpInfo(null);
+    }
+  }
+
   async function detectPublicIpViaStun() {
     if (typeof window === "undefined") return;
     setStunError(null);
     setPublicIp(null);
+    setIpInfo(null);
 
     const RTCPeer =
       window.RTCPeerConnection ||
@@ -91,6 +130,10 @@ export default function WifiCheckPage() {
           );
         }
         setPublicIp(ip);
+        if (ip) {
+          // Busca localização/ISP em background.
+          void fetchGeoInfo(ip);
+        }
         resolve();
       }
 
@@ -102,7 +145,8 @@ export default function WifiCheckPage() {
 
         const candidate = event.candidate.candidate;
         const parts = candidate.split(" ");
-        const [ip, , type] = [parts[4], parts[5], parts[7]];
+        const ip = parts[4];
+        const type = parts[7];
 
         if (type === "srflx" && ip) {
           candidates.add(ip);
@@ -217,6 +261,13 @@ export default function WifiCheckPage() {
     checkHttps();
   }, []);
 
+  const flagEmoji = ipInfo?.countryCode
+    ? countryCodeToFlag(ipInfo.countryCode)
+    : "";
+
+  const locationText =
+    ipInfo?.locationText || (publicIp ? "Localização não disponível." : null);
+
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="wifi-card space-y-6">
@@ -259,7 +310,7 @@ export default function WifiCheckPage() {
             </p>
           </section>
 
-          {/* STUN / IP público */}
+          {/* STUN / IP público + geolocalização */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
               <h2 className="wifi-section-title">IP público (STUN)</h2>
@@ -272,6 +323,7 @@ export default function WifiCheckPage() {
                 <span className="wifi-chip wifi-badge-warn">Indisponível</span>
               )}
             </div>
+
             {publicIp ? (
               <p className="wifi-mono">{publicIp}</p>
             ) : (
@@ -280,8 +332,31 @@ export default function WifiCheckPage() {
                   "Execute os testes para tentar obter o IP público via STUN."}
               </p>
             )}
+
             {stunError && (
               <p className="text-xs text-amber-300">{stunError}</p>
+            )}
+
+            {publicIp && (
+              <div className="mt-3 space-y-1 text-xs text-slate-200">
+                <p>
+                  <span className="font-semibold">
+                    Localização do meu endereço de IP:
+                  </span>{" "}
+                  {flagEmoji && (
+                    <span className="mr-1" aria-hidden="true">
+                      {flagEmoji}
+                    </span>
+                  )}
+                  {locationText}
+                </p>
+                <p>
+                  <span className="font-semibold">
+                    Fornecedor de serviços de internet:
+                  </span>{" "}
+                  {ipInfo?.isp || "Não disponível."}
+                </p>
+              </div>
             )}
           </section>
 
@@ -453,7 +528,7 @@ export default function WifiCheckPage() {
               <ul className="mb-2 list-disc pl-4">
                 <li>
                   Se a conexão está usando HTTPS real (e não um MITM com
-                  certificado inválido.
+                  certificado inválido).
                 </li>
                 <li>
                   Fingerprint parcial do certificado/rota, o que ajuda a
@@ -502,6 +577,13 @@ export default function WifiCheckPage() {
             Este painel fornece apenas indícios de segurança da rota. Não
             substitui ferramentas profissionais de análise de tráfego.
           </p>
+
+          <div className="mt-3">
+            <hr className="border-slate-700" />
+            <p className="mt-2 text-[11px] text-white">
+              Powered by Rafael Freitas
+            </p>
+          </div>
         </footer>
       </section>
     </main>
