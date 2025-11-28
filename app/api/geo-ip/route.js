@@ -14,24 +14,25 @@ export async function GET(request) {
 
   try {
     const resp = await fetch(
-      `https://ipapi.co/${encodeURIComponent(ip)}/json/`,
+      `https://ipwho.is/${encodeURIComponent(ip)}`,
       { cache: "no-store" }
     );
 
     const data = await resp.json();
 
-    if (!resp.ok || data.error) {
+    if (!resp.ok || !data || data.success === false) {
       return Response.json(
         { error: "Não foi possível obter informações para este IP." },
         { status: 502 }
       );
     }
 
-    const country = data.country_name || null;
+    const country = data.country || null;
     const region = data.region || null;
     const city = data.city || null;
-    const isp = data.org || data.org_name || data.asn || null;
-    const countryCode = data.country || null;
+    const isp =
+      (data.connection && (data.connection.isp || data.connection.org)) || null;
+    const countryCode = data.country_code || null;
 
     return Response.json(
       {
@@ -48,7 +49,7 @@ export async function GET(request) {
         },
       }
     );
-  } catch (error) {
+  } catch {
     return Response.json(
       { error: "Erro ao consultar serviço de geolocalização." },
       { status: 500 }
