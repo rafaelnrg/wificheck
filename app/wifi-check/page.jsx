@@ -269,8 +269,8 @@ export default function WifiCheckPage() {
     ipInfo?.locationText || (publicIp ? "Localização não disponível." : null);
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <section className="wifi-card space-y-6">
+    <main className="min-h-screen px-4 pt-4 pb-8">
+      <section className="wifi-card mx-auto space-y-6">
         <header className="flex flex-col gap-2 border-b border-slate-700/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold">
@@ -457,7 +457,20 @@ export default function WifiCheckPage() {
         </div>
 
         {/* Score de segurança */}
-        <section className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
+        <section
+          className={`rounded-xl border bg-slate-900/60 p-4 ${
+            scoreResult?.level
+              ? (() => {
+                  const level = String(scoreResult.level).toLowerCase();
+                  if (level.startsWith("boa")) return "border-emerald-500/70";
+                  if (level.startsWith("ok")) return "border-sky-400/70";
+                  if (level.startsWith("aten")) return "border-amber-400/70";
+                  if (level.startsWith("cr")) return "border-rose-500/70";
+                  return "border-slate-700/70";
+                })()
+              : "border-slate-700/70"
+          }`}
+        >
           <h2 className="wifi-section-title mb-2">Score de segurança</h2>
 
           {!scoreResult && (
@@ -589,4 +602,3 @@ export default function WifiCheckPage() {
     </main>
   );
 }
-
