@@ -30,6 +30,8 @@ export default function WifiCheckPage() {
   const [headersInfo, setHeadersInfo] = useState(null);
   const [proxyInfo, setProxyInfo] = useState(null);
   const [scoreResult, setScoreResult] = useState(null);
+  const [downloadMbps, setDownloadMbps] = useState(null);
+  const [uploadMbps, setUploadMbps] = useState(null);
   const [loadingAll, setLoadingAll] = useState(false);
   const [lastRunAt, setLastRunAt] = useState(null);
   const [showAbout, setShowAbout] = useState(false);
@@ -225,13 +227,69 @@ export default function WifiCheckPage() {
     }
   }
 
+  async function runSpeedTests() {
+    if (typeof window === "undefined" || typeof performance === "undefined") {
+      setDownloadMbps(null);
+      setUploadMbps(null);
+      return;
+    }
+
+    try {
+      const sizeBytes = 2 * 1024 * 1024; // 2 MB
+
+      // Download
+      const startDown = performance.now();
+      const resDown = await fetch(
+        `/api/connection-speed/download?size=${sizeBytes}`,
+        { cache: "no-store" }
+      );
+      const bufDown = await resDown.arrayBuffer();
+      const endDown = performance.now();
+      const secondsDown = (endDown - startDown) / 1000;
+
+      if (secondsDown > 0 && bufDown.byteLength > 0) {
+        const mbpsDown =
+          (bufDown.byteLength * 8) / (secondsDown * 1024 * 1024);
+        setDownloadMbps(mbpsDown);
+      } else {
+        setDownloadMbps(null);
+      }
+
+      // Upload
+      const payload = new Uint8Array(sizeBytes);
+      const startUp = performance.now();
+      const resUp = await fetch("/api/connection-speed/upload", {
+        method: "POST",
+        headers: { "content-type": "application/octet-stream" },
+        body: payload,
+      });
+      await resUp.arrayBuffer();
+      const endUp = performance.now();
+      const secondsUp = (endUp - startUp) / 1000;
+
+      if (secondsUp > 0) {
+        const mbpsUp =
+          (payload.byteLength * 8) / (secondsUp * 1024 * 1024);
+        setUploadMbps(mbpsUp);
+      } else {
+        setUploadMbps(null);
+      }
+    } catch {
+      setDownloadMbps(null);
+      setUploadMbps(null);
+    }
+  }
+
   async function runAllTests() {
     setLoadingAll(true);
     setScoreResult(null);
+    setDownloadMbps(null);
+    setUploadMbps(null);
 
     checkHttps();
     await detectPublicIpViaStun();
     await runLatencyTest();
+    await runSpeedTests();
     await fetchHeadersAndProxyInfo();
 
     try {
@@ -271,10 +329,39 @@ export default function WifiCheckPage() {
   return (
     <main className="min-h-screen px-4 pt-4 pb-8">
       <section className="wifi-card mx-auto space-y-6">
+        <div className="rounded-xl border border-slate-700/70 bg-slate-900/60 p-3 text-sm text-slate-200">
+          <h2 className="wifi-section-title mb-1">Velocidade da internet</h2>
+          <div className="grid gap-3 text-xs sm:grid-cols-3">
+            <div>
+              <p className="text-slate-400">Ping médio</p>
+              <p className="font-mono text-sky-300 text-2xl">
+                {latencyStats.avg != null
+                  ? `${latencyStats.avg.toFixed(0)} ms`
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-400">Download</p>
+              <p className="font-mono text-emerald-300 text-2xl">
+                {downloadMbps != null
+                  ? `${downloadMbps.toFixed(1)} Mbps`
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-slate-400">Upload</p>
+              <p className="font-mono text-amber-300 text-2xl">
+                {uploadMbps != null
+                  ? `${uploadMbps.toFixed(1)} Mbps`
+                  : "-"}
+              </p>
+            </div>
+          </div>
+        </div>
         <header className="flex flex-col gap-2 border-b border-slate-700/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold">
-              Diagnóstico rápido da sua conexão
+              Diagnóstico de segurança da sua conexão
             </h1>
             <p className="text-sm text-slate-300">
               Verifica HTTPS, IP público aproximado, latência e presença de
@@ -285,9 +372,15 @@ export default function WifiCheckPage() {
           <button
             type="button"
             onClick={runAllTests}
-            className="mt-3 inline-flex items-center justify-center rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/40 transition hover:bg-sky-400 sm:mt-0"
+            className="mt-3 inline-flex h-20 w-20 items-center justify-center rounded-full bg-sky-500 text-xl font-bold text-slate-950 shadow-lg shadow-sky-500/40 transition hover:bg-sky-400 sm:mt-0"
           >
-            {loadingAll ? "Executando testes..." : "Executar testes"}
+            {loadingAll ? (
+              <span className="leading-tight text-sm font-bold">
+                INICIANDO
+              </span>
+            ) : (
+              <span className="leading-tight">INICIAR</span>
+            )}
           </button>
         </header>
 
@@ -462,10 +555,18 @@ export default function WifiCheckPage() {
             scoreResult?.level
               ? (() => {
                   const level = String(scoreResult.level).toLowerCase();
-                  if (level.startsWith("boa")) return "border-emerald-500/70";
-                  if (level.startsWith("ok")) return "border-sky-400/70";
-                  if (level.startsWith("aten")) return "border-amber-400/70";
-                  if (level.startsWith("cr")) return "border-rose-500/70";
+                  if (level.startsWith("boa")) {
+                    return "border-emerald-500/70 bg-emerald-500/5";
+                  }
+                  if (level.startsWith("ok")) {
+                    return "border-sky-400/70 bg-sky-400/5";
+                  }
+                  if (level.startsWith("aten")) {
+                    return "border-amber-400/70 bg-amber-400/5";
+                  }
+                  if (level.startsWith("cr")) {
+                    return "border-rose-500/70 bg-rose-500/5";
+                  }
                   return "border-slate-700/70";
                 })()
               : "border-slate-700/70"
@@ -534,11 +635,11 @@ export default function WifiCheckPage() {
           </div>
 
           {showAbout && (
-            <div className="mx-auto mt-1 max-w-2xl rounded-lg border border-slate-700/70 bg-slate-900/80 p-3 text-left text-[11px] leading-relaxed text-slate-200">
-              <p className="mb-1 font-semibold text-slate-100">
+            <div className="mx-auto mt-1 max-w-2xl rounded-lg border border-slate-700/70 bg-slate-900/80 p-3 text-left text-[11px] leading-relaxed">
+              <p className="mb-1 font-semibold text-sky-300">
                 O que é possível detectar via página web
               </p>
-              <ul className="mb-2 list-disc pl-4">
+              <ul className="mb-2 list-disc pl-4 text-sky-200">
                 <li>
                   Se a conexão está usando HTTPS real (e não um MITM com
                   certificado inválido).
@@ -568,7 +669,7 @@ export default function WifiCheckPage() {
               <p className="mb-1 font-semibold text-slate-100">
                 O que não é possível apenas pelo browser
               </p>
-              <ul className="list-disc pl-4">
+              <ul className="list-disc pl-4 text-amber-200">
                 <li>Executar traceroute real a partir do seu dispositivo.</li>
                 <li>
                   Acessar a tabela de roteamento ou configuração de rede do
@@ -602,3 +703,13 @@ export default function WifiCheckPage() {
     </main>
   );
 }
+
+
+
+
+
+
+
+
+
+
