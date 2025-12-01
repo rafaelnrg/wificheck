@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -56,14 +56,14 @@ export default function WifiCheckPage() {
     if (!isSecure) {
       if (protocol !== "https:") {
         details =
-          "A página não está carregada sobre HTTPS. Isso facilita ataques de interceptação (MITM).";
+          "A pÃ¡gina nÃ£o estÃ¡ carregada sobre HTTPS. Isso facilita ataques de interceptaÃ§Ã£o (MITM).";
       } else if (!window.isSecureContext) {
         details =
-          "O navegador não considera este contexto totalmente seguro (isSecureContext = false).";
+          "O navegador nÃ£o considera este contexto totalmente seguro (isSecureContext = false).";
       }
     } else {
       details =
-        "Conexão HTTPS ativa e contexto considerado seguro pelo navegador.";
+        "ConexÃ£o HTTPS ativa e contexto considerado seguro pelo navegador.";
     }
 
     setHttpsInfo({ secure: isSecure, details });
@@ -108,7 +108,7 @@ export default function WifiCheckPage() {
       window.mozRTCPeerConnection;
 
     if (!RTCPeer) {
-      setStunError("WebRTC não é suportado neste navegador.");
+      setStunError("WebRTC nÃ£o Ã© suportado neste navegador.");
       return;
     }
 
@@ -128,12 +128,12 @@ export default function WifiCheckPage() {
         const ip = candidates.size ? Array.from(candidates)[0] : null;
         if (!ip) {
           setStunError(
-            "Não foi possível obter o IP público via STUN (pode estar bloqueado)."
+            "NÃ£o foi possÃ­vel obter o IP pÃºblico via STUN (pode estar bloqueado)."
           );
         }
         setPublicIp(ip);
         if (ip) {
-          // Busca localização/ISP em background.
+          // Busca localizaÃ§Ã£o/ISP em background.
           void fetchGeoInfo(ip);
         }
         resolve();
@@ -324,7 +324,7 @@ export default function WifiCheckPage() {
     : "";
 
   const locationText =
-    ipInfo?.locationText || (publicIp ? "Localização não disponível." : null);
+    ipInfo?.locationText || (publicIp ? "LocalizaÃ§Ã£o nÃ£o disponÃ­vel." : null);
 
   return (
     <main className="min-h-screen px-4 pt-4 pb-8">
@@ -333,7 +333,7 @@ export default function WifiCheckPage() {
           <h2 className="wifi-section-title mb-1">Velocidade da internet</h2>
           <div className="grid gap-3 text-xs sm:grid-cols-3">
             <div>
-              <p className="text-slate-400">Ping médio</p>
+              <p className="text-slate-400">Ping mÃ©dio</p>
               <p className="font-mono text-sky-300 text-2xl">
                 {latencyStats.avg != null
                   ? `${latencyStats.avg.toFixed(0)} ms`
@@ -361,10 +361,10 @@ export default function WifiCheckPage() {
         <header className="flex flex-col gap-2 border-b border-slate-700/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold">
-              Diagnóstico de segurança da sua conexão
+              DiagnÃ³stico de seguranÃ§a da sua conexÃ£o
             </h1>
             <p className="text-sm text-slate-300">
-              Verifica HTTPS, IP público aproximado, latência e presença de
+              Verifica HTTPS, IP pÃºblico aproximado, latÃªncia e presenÃ§a de
               proxies na rota.
             </p>
           </div>
@@ -388,7 +388,7 @@ export default function WifiCheckPage() {
           {/* HTTPS / MITM */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">HTTPS / MITM básico</h2>
+              <h2 className="wifi-section-title">HTTPS / MITM bÃ¡sico</h2>
               {httpsInfo.secure === true && (
                 <span className="wifi-chip wifi-badge-ok">HTTPS ativo</span>
               )}
@@ -398,22 +398,22 @@ export default function WifiCheckPage() {
             </div>
             <p className="text-sm text-slate-200">{httpsInfo.details}</p>
             <p className="text-xs text-slate-500">
-              Navegadores não expõem o certificado diretamente via JavaScript,
-              então este teste é apenas heurístico.
+              Navegadores nÃ£o expÃµem o certificado diretamente via JavaScript,
+              entÃ£o este teste Ã© apenas heurÃ­stico.
             </p>
           </section>
 
-          {/* STUN / IP público + geolocalização */}
+          {/* STUN / IP pÃºblico + geolocalizaÃ§Ã£o */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">IP público (STUN)</h2>
+              <h2 className="wifi-section-title">IP pÃºblico (STUN)</h2>
               {publicIp && (
                 <span className="wifi-chip wifi-badge-ok">
                   IP detectado via WebRTC
                 </span>
               )}
               {!publicIp && stunError && (
-                <span className="wifi-chip wifi-badge-warn">Indisponível</span>
+                <span className="wifi-chip wifi-badge-warn">IndisponÃ­vel</span>
               )}
             </div>
 
@@ -422,7 +422,7 @@ export default function WifiCheckPage() {
             ) : (
               <p className="text-sm text-slate-200">
                 {stunError ??
-                  "Execute os testes para tentar obter o IP público via STUN."}
+                  "Execute os testes para tentar obter o IP pÃºblico via STUN."}
               </p>
             )}
 
@@ -434,7 +434,7 @@ export default function WifiCheckPage() {
               <div className="mt-3 space-y-1 text-xs text-slate-200">
                 <p>
                   <span className="font-semibold">
-                    Localização do meu endereço de IP:
+                    LocalizaÃ§Ã£o do meu endereÃ§o de IP:
                   </span>{" "}
                   {flagEmoji && (
                     <span className="mr-1" aria-hidden="true">
@@ -445,18 +445,18 @@ export default function WifiCheckPage() {
                 </p>
                 <p>
                   <span className="font-semibold">
-                    Fornecedor de serviços de internet:
+                    Fornecedor de serviÃ§os de internet:
                   </span>{" "}
-                  {ipInfo?.isp || "Não disponível."}
+                  {ipInfo?.isp || "NÃ£o disponÃ­vel."}
                 </p>
               </div>
             )}
           </section>
 
-          {/* Latência */}
+          {/* LatÃªncia */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">Latência até o servidor</h2>
+              <h2 className="wifi-section-title">LatÃªncia atÃ© o servidor</h2>
               {latencySamples.length > 0 && (
                 <span className="wifi-chip">
                   {latencySamples.length} amostras
@@ -465,31 +465,31 @@ export default function WifiCheckPage() {
             </div>
             {latencyRunning && (
               <p className="text-sm text-slate-200">
-                Medindo latência... aguarde alguns segundos.
+                Medindo latÃªncia... aguarde alguns segundos.
               </p>
             )}
             {!latencyRunning && latencySamples.length === 0 && (
               <p className="text-sm text-slate-200">
-                Nenhum teste de latência ainda. Use o botão &quot;Executar
+                Nenhum teste de latÃªncia ainda. Use o botÃ£o &quot;Executar
                 testes&quot;.
               </p>
             )}
             {latencySamples.length > 0 && (
               <div className="space-y-1 text-sm text-slate-200">
                 <p>
-                  Média:{" "}
+                  MÃ©dia:{" "}
                   <span className="font-mono">
                     {formatMs(latencyStats.avg)}
                   </span>
                 </p>
                 <p>
-                  Mínima:{" "}
+                  MÃ­nima:{" "}
                   <span className="font-mono">
                     {formatMs(latencyStats.min)}
                   </span>
                 </p>
                 <p>
-                  Máxima:{" "}
+                  MÃ¡xima:{" "}
                   <span className="font-mono">
                     {formatMs(latencyStats.max)}
                   </span>
@@ -507,15 +507,15 @@ export default function WifiCheckPage() {
               )}
               {proxyInfo && !proxyInfo.detected && (
                 <span className="wifi-chip wifi-badge-ok">
-                  Nenhum proxy óbvio
+                  Nenhum proxy Ã³bvio
                 </span>
               )}
             </div>
 
             {!headersInfo && (
               <p className="text-sm text-slate-200">
-                Headers ainda não coletados. Execute os testes para ver os
-                cabeçalhos reais recebidos pelo backend.
+                Headers ainda nÃ£o coletados. Execute os testes para ver os
+                cabeÃ§alhos reais recebidos pelo backend.
               </p>
             )}
 
@@ -523,14 +523,14 @@ export default function WifiCheckPage() {
               <div className="space-y-2">
                 {proxyInfo.detected ? (
                   <p className="text-sm text-amber-200">
-                    Foram encontrados headers típicos de proxy ou balanceador,
-                    como <code>X-Forwarded-*</code> ou <code>Via</code>. Isso é
-                    comum em CDNs/provedores, mas também pode indicar proxies
-                    intermediários.
+                    Foram encontrados headers tÃ­picos de proxy ou balanceador,
+                    como <code>X-Forwarded-*</code> ou <code>Via</code>. Isso Ã©
+                    comum em CDNs/provedores, mas tambÃ©m pode indicar proxies
+                    intermediÃ¡rios.
                   </p>
                 ) : (
                   <p className="text-sm text-emerald-200">
-                    Nenhum header típico de proxy foi encontrado.
+                    Nenhum header tÃ­pico de proxy foi encontrado.
                   </p>
                 )}
 
@@ -549,7 +549,7 @@ export default function WifiCheckPage() {
           </section>
         </div>
 
-        {/* Score de segurança */}
+        {/* Score de seguranÃ§a */}
         <section
           className={`rounded-xl border bg-slate-900/60 p-4 ${
             scoreResult?.level
@@ -572,12 +572,12 @@ export default function WifiCheckPage() {
               : "border-slate-700/70"
           }`}
         >
-          <h2 className="wifi-section-title mb-2">Score de segurança</h2>
+          <h2 className="wifi-section-title mb-2">Score de seguranÃ§a</h2>
 
           {!scoreResult && (
             <p className="text-sm text-slate-200">
-              Após rodar os testes, um score heurístico de 0 a 100 será exibido
-              aqui, combinando HTTPS, proxies e latência.
+              ApÃ³s rodar os testes, um score heurÃ­stico de 0 a 100 serÃ¡ exibido
+              aqui, combinando HTTPS, proxies e latÃªncia.
             </p>
           )}
 
@@ -594,7 +594,7 @@ export default function WifiCheckPage() {
 
               {scoreResult.level && (
                 <p className="text-sm text-slate-200">
-                  Nível estimado:{" "}
+                  NÃ­vel estimado:{" "}
                   <span className="font-semibold">{scoreResult.level}</span>
                 </p>
               )}
@@ -610,11 +610,11 @@ export default function WifiCheckPage() {
           )}
         </section>
 
-        {/* Rodapé / Sobre o teste */}
+        {/* RodapÃ© / Sobre o teste */}
         <footer className="border-t border-slate-800 pt-3 text-center text-xs text-slate-500 space-y-2">
           {lastRunAt && (
             <p className="mb-1">
-              Última execução:{" "}
+              Ãšltima execuÃ§Ã£o:{" "}
               {lastRunAt.toLocaleString("pt-BR", {
                 hour12: false,
               })}
@@ -628,7 +628,7 @@ export default function WifiCheckPage() {
               className="inline-flex items-center gap-1 rounded-full border border-slate-600/80 bg-slate-900/80 px-3 py-1 text-[11px] font-medium text-slate-100 shadow-sm shadow-slate-900/60 transition hover:border-sky-400/80 hover:bg-slate-900"
             >
               <span className="text-xs" aria-hidden="true">
-                🔍
+                ðŸ”
               </span>
               <span>Sobre o teste</span>
             </button>
@@ -637,59 +637,59 @@ export default function WifiCheckPage() {
           {showAbout && (
             <div className="mx-auto mt-1 max-w-2xl rounded-lg border border-slate-700/70 bg-slate-900/80 p-3 text-left text-[11px] leading-relaxed">
               <p className="mb-1 font-semibold text-sky-300">
-                O que é possível detectar via página web
+                {"O que \u00E9 poss\u00EDvel detectar via p\u00E1gina web"}
               </p>
               <ul className="mb-2 list-disc pl-4 text-sky-200">
                 <li>
-                  Se a conexão está usando HTTPS real (e não um MITM com
-                  certificado inválido).
+                  {"Se a conex\u00E3o est\u00E1 usando HTTPS real (e n\u00E3o um MITM com"}
+                  {"certificado inv\u00E1lido)."}
                 </li>
                 <li>
-                  Fingerprint parcial do certificado/rota, o que ajuda a
-                  perceber interceptações ou proxies transparentes.
+                  {"Fingerprint parcial do certificado/rota, o que ajuda a"}
+                  {"perceber intercepta\u00E7\u00F5es ou proxies transparentes."}
                 </li>
                 <li>
-                  IP público aproximado do usuário, permitindo comparar com
-                  redes conhecidas.
+                  {"IP p\u00FAblico aproximado do usu\u00E1rio, permitindo comparar com"}
+                  {"redes conhecidas."}
                 </li>
                 <li>
-                  Latência e comportamento da rota usando chamadas HTTP e
-                  STUN/WebRTC.
+                  {"Lat\u00EAncia e comportamento da rota usando chamadas HTTP e"}
+                  {"STUN/WebRTC."}
                 </li>
                 <li>
-                  Presença de proxies transparentes por meio da análise de
-                  headers como Via e X-Forwarded-*.
+                  {"Presen\u00E7a de proxies transparentes por meio da an\u00E1lise de"}
+                  {"headers como Via e X-Forwarded-*."}
                 </li>
                 <li>
-                  Indícios de vazamento de DNS (DNS leak) com requisições para
-                  domínios específicos.
+                  {"Ind\u00EDcios de vazamento de DNS (DNS leak) com requisi\u00E7\u00F5es para"}
+                  {"dom\u00EDnios espec\u00EDficos."}
                 </li>
               </ul>
 
               <p className="mb-1 font-semibold text-slate-100">
-                O que não é possível apenas pelo browser
+                {"O que n\u00E3o \u00E9 poss\u00EDvel apenas pelo browser"}
               </p>
               <ul className="list-disc pl-4 text-amber-200">
                 <li>Executar traceroute real a partir do seu dispositivo.</li>
                 <li>
-                  Acessar a tabela de roteamento ou configuração de rede do
-                  sistema.
+                  {"Acessar a tabela de roteamento ou configura\u00E7\u00E3o de rede do"}
+                  {"sistema."}
                 </li>
                 <li>
-                  Detectar diretamente se o Wi‑Fi usa WPA2, WPA3 ou outro
-                  protocolo.
+                  {"Detectar diretamente se o Wi-Fi usa WPA2, WPA3 ou outro"}
+                  {"protocolo."}
                 </li>
                 <li>
-                  Validar toda a superfície de ataque da rede – aqui fazemos
-                  apenas inferência de risco, não uma auditoria completa.
+                  {"Validar toda a superf\u00EDcie de ataque da rede  aqui fazemos"}
+                  {"apenas infer\u00EAncia de risco, n\u00E3o uma auditoria completa."}
                 </li>
               </ul>
             </div>
           )}
 
           <p className="pt-1">
-            Este painel fornece apenas indícios de segurança da rota. Não
-            substitui ferramentas profissionais de análise de tráfego.
+            {"Este painel fornece apenas ind\u00EDcios de seguran\u00E7a da rota. N\u00E3o"
+            {"substitui ferramentas profissionais de an\u00E1lise de tr\u00E1fego."}
           </p>
 
           <div className="mt-3">
