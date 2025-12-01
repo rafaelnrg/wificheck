@@ -11,17 +11,12 @@ function countryCodeToFlag(code) {
   if (!code || typeof code !== "string") return "";
   const upper = code.trim().toUpperCase();
   if (upper.length !== 2) return "";
-  const codePoints = [...upper].map(
-    (char) => 127397 + char.codePointAt(0)
-  );
+  const codePoints = [...upper].map((char) => 127397 + char.codePointAt(0));
   return String.fromCodePoint(...codePoints);
 }
 
 export default function WifiCheckPage() {
-  const [httpsInfo, setHttpsInfo] = useState({
-    secure: null,
-    details: "",
-  });
+  const [httpsInfo, setHttpsInfo] = useState({ secure: null, details: "" });
   const [publicIp, setPublicIp] = useState(null);
   const [stunError, setStunError] = useState(null);
   const [ipInfo, setIpInfo] = useState(null);
@@ -56,14 +51,14 @@ export default function WifiCheckPage() {
     if (!isSecure) {
       if (protocol !== "https:") {
         details =
-          "A pÃ¡gina nÃ£o estÃ¡ carregada sobre HTTPS. Isso facilita ataques de interceptaÃ§Ã£o (MITM).";
+          "A página não está carregada sobre HTTPS. Isso facilita ataques de interceptação (MITM).";
       } else if (!window.isSecureContext) {
         details =
-          "O navegador nÃ£o considera este contexto totalmente seguro (isSecureContext = false).";
+          "O navegador não considera este contexto totalmente seguro (isSecureContext = false).";
       }
     } else {
       details =
-        "ConexÃ£o HTTPS ativa e contexto considerado seguro pelo navegador.";
+        "Conexão HTTPS ativa e contexto considerado seguro pelo navegador.";
     }
 
     setHttpsInfo({ secure: isSecure, details });
@@ -108,7 +103,7 @@ export default function WifiCheckPage() {
       window.mozRTCPeerConnection;
 
     if (!RTCPeer) {
-      setStunError("WebRTC nÃ£o Ã© suportado neste navegador.");
+      setStunError("WebRTC não é suportado neste navegador.");
       return;
     }
 
@@ -128,12 +123,11 @@ export default function WifiCheckPage() {
         const ip = candidates.size ? Array.from(candidates)[0] : null;
         if (!ip) {
           setStunError(
-            "NÃ£o foi possÃ­vel obter o IP pÃºblico via STUN (pode estar bloqueado)."
+            "Não foi possível obter o IP público via STUN (pode estar bloqueado)."
           );
         }
         setPublicIp(ip);
         if (ip) {
-          // Busca localizaÃ§Ã£o/ISP em background.
           void fetchGeoInfo(ip);
         }
         resolve();
@@ -195,9 +189,7 @@ export default function WifiCheckPage() {
 
   async function fetchHeadersAndProxyInfo() {
     try {
-      const response = await fetch("/api/check-headers", {
-        cache: "no-store",
-      });
+      const response = await fetch("/api/check-headers", { cache: "no-store" });
       const data = await response.json();
       const headers = data.headers || {};
 
@@ -235,9 +227,8 @@ export default function WifiCheckPage() {
     }
 
     try {
-      const sizeBytes = 2 * 1024 * 1024; // 2 MB
+      const sizeBytes = 2 * 1024 * 1024;
 
-      // Download
       const startDown = performance.now();
       const resDown = await fetch(
         `/api/connection-speed/download?size=${sizeBytes}`,
@@ -255,7 +246,6 @@ export default function WifiCheckPage() {
         setDownloadMbps(null);
       }
 
-      // Upload
       const payload = new Uint8Array(sizeBytes);
       const startUp = performance.now();
       const resUp = await fetch("/api/connection-speed/upload", {
@@ -324,7 +314,7 @@ export default function WifiCheckPage() {
     : "";
 
   const locationText =
-    ipInfo?.locationText || (publicIp ? "LocalizaÃ§Ã£o nÃ£o disponÃ­vel." : null);
+    ipInfo?.locationText || (publicIp ? "Localização não disponível." : null);
 
   return (
     <main className="min-h-screen px-4 pt-4 pb-8">
@@ -333,7 +323,7 @@ export default function WifiCheckPage() {
           <h2 className="wifi-section-title mb-1">Velocidade da internet</h2>
           <div className="grid gap-3 text-xs sm:grid-cols-3">
             <div>
-              <p className="text-slate-400">Ping mÃ©dio</p>
+              <p className="text-slate-400">Ping médio</p>
               <p className="font-mono text-sky-300 text-2xl">
                 {latencyStats.avg != null
                   ? `${latencyStats.avg.toFixed(0)} ms`
@@ -358,14 +348,16 @@ export default function WifiCheckPage() {
             </div>
           </div>
         </div>
+
         <header className="flex flex-col gap-2 border-b border-slate-700/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold">
-              DiagnÃ³stico de seguranÃ§a da sua conexÃ£o
+              {"Diagnóstico de segurança da sua conexão"}
             </h1>
             <p className="text-sm text-slate-300">
-              Verifica HTTPS, IP pÃºblico aproximado, latÃªncia e presenÃ§a de
-              proxies na rota.
+              {
+                "Verifica HTTPS, IP público aproximado, latência e presença de proxies na rota."
+              }
             </p>
           </div>
 
@@ -385,10 +377,9 @@ export default function WifiCheckPage() {
         </header>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {/* HTTPS / MITM */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">HTTPS / MITM bÃ¡sico</h2>
+              <h2 className="wifi-section-title">HTTPS / MITM BÁSICO</h2>
               {httpsInfo.secure === true && (
                 <span className="wifi-chip wifi-badge-ok">HTTPS ativo</span>
               )}
@@ -398,22 +389,24 @@ export default function WifiCheckPage() {
             </div>
             <p className="text-sm text-slate-200">{httpsInfo.details}</p>
             <p className="text-xs text-slate-500">
-              Navegadores nÃ£o expÃµem o certificado diretamente via JavaScript,
-              entÃ£o este teste Ã© apenas heurÃ­stico.
+              {
+                "Navegadores não expõem o certificado diretamente via JavaScript, então este teste é apenas heurístico."
+              }
             </p>
           </section>
 
-          {/* STUN / IP pÃºblico + geolocalizaÃ§Ã£o */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">IP pÃºblico (STUN)</h2>
+              <h2 className="wifi-section-title">IP PÚBLICO (STUN)</h2>
               {publicIp && (
                 <span className="wifi-chip wifi-badge-ok">
                   IP detectado via WebRTC
                 </span>
               )}
               {!publicIp && stunError && (
-                <span className="wifi-chip wifi-badge-warn">IndisponÃ­vel</span>
+                <span className="wifi-chip wifi-badge-warn">
+                  Indisponível
+                </span>
               )}
             </div>
 
@@ -422,7 +415,7 @@ export default function WifiCheckPage() {
             ) : (
               <p className="text-sm text-slate-200">
                 {stunError ??
-                  "Execute os testes para tentar obter o IP pÃºblico via STUN."}
+                  "Execute os testes para tentar obter o IP público via STUN."}
               </p>
             )}
 
@@ -434,7 +427,7 @@ export default function WifiCheckPage() {
               <div className="mt-3 space-y-1 text-xs text-slate-200">
                 <p>
                   <span className="font-semibold">
-                    LocalizaÃ§Ã£o do meu endereÃ§o de IP:
+                    Localização do meu endereço de IP:
                   </span>{" "}
                   {flagEmoji && (
                     <span className="mr-1" aria-hidden="true">
@@ -445,51 +438,52 @@ export default function WifiCheckPage() {
                 </p>
                 <p>
                   <span className="font-semibold">
-                    Fornecedor de serviÃ§os de internet:
+                    Fornecedor de serviços de internet:
                   </span>{" "}
-                  {ipInfo?.isp || "NÃ£o disponÃ­vel."}
+                  {ipInfo?.isp || "Não disponível."}
                 </p>
               </div>
             )}
           </section>
 
-          {/* LatÃªncia */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">LatÃªncia atÃ© o servidor</h2>
+              <h2 className="wifi-section-title">LATÊNCIA ATÉ O SERVIDOR</h2>
               {latencySamples.length > 0 && (
                 <span className="wifi-chip">
                   {latencySamples.length} amostras
                 </span>
               )}
             </div>
+
             {latencyRunning && (
               <p className="text-sm text-slate-200">
-                Medindo latÃªncia... aguarde alguns segundos.
+                Medindo latência... aguarde alguns segundos.
               </p>
             )}
+
             {!latencyRunning && latencySamples.length === 0 && (
               <p className="text-sm text-slate-200">
-                Nenhum teste de latÃªncia ainda. Use o botÃ£o &quot;Executar
-                testes&quot;.
+                Nenhum teste de latência ainda. Use o botão "Executar testes".
               </p>
             )}
-            {latencySamples.length > 0 && (
+
+            {!latencyRunning && latencySamples.length > 0 && (
               <div className="space-y-1 text-sm text-slate-200">
                 <p>
-                  MÃ©dia:{" "}
+                  Média:{" "}
                   <span className="font-mono">
                     {formatMs(latencyStats.avg)}
                   </span>
                 </p>
                 <p>
-                  MÃ­nima:{" "}
+                  Mínima:{" "}
                   <span className="font-mono">
                     {formatMs(latencyStats.min)}
                   </span>
                 </p>
                 <p>
-                  MÃ¡xima:{" "}
+                  Máxima:{" "}
                   <span className="font-mono">
                     {formatMs(latencyStats.max)}
                   </span>
@@ -498,24 +492,25 @@ export default function WifiCheckPage() {
             )}
           </section>
 
-          {/* Proxies / headers */}
           <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/60 p-4">
             <div className="flex items-center justify-between">
-              <h2 className="wifi-section-title">Proxies / headers</h2>
+              <h2 className="wifi-section-title">PROXIES / HEADERS</h2>
               {proxyInfo?.detected && (
-                <span className="wifi-chip wifi-badge-warn">Proxy na rota</span>
+                <span className="wifi-chip wifi-badge-warn">
+                  Proxy na rota
+                </span>
               )}
               {proxyInfo && !proxyInfo.detected && (
                 <span className="wifi-chip wifi-badge-ok">
-                  Nenhum proxy Ã³bvio
+                  Nenhum proxy óbvio
                 </span>
               )}
             </div>
 
             {!headersInfo && (
               <p className="text-sm text-slate-200">
-                Headers ainda nÃ£o coletados. Execute os testes para ver os
-                cabeÃ§alhos reais recebidos pelo backend.
+                Headers ainda não coletados. Execute os testes para ver os
+                cabeçalhos reais recebidos pelo backend.
               </p>
             )}
 
@@ -523,14 +518,14 @@ export default function WifiCheckPage() {
               <div className="space-y-2">
                 {proxyInfo.detected ? (
                   <p className="text-sm text-amber-200">
-                    Foram encontrados headers tÃ­picos de proxy ou balanceador,
-                    como <code>X-Forwarded-*</code> ou <code>Via</code>. Isso Ã©
-                    comum em CDNs/provedores, mas tambÃ©m pode indicar proxies
-                    intermediÃ¡rios.
+                    Foram encontrados headers típicos de proxy ou
+                    balanceador, como <code>X-Forwarded-*</code> ou
+                    <code>Via</code>. Isso é comum em CDNs/provedores, mas
+                    também pode indicar proxies intermediários.
                   </p>
                 ) : (
                   <p className="text-sm text-emerald-200">
-                    Nenhum header tÃ­pico de proxy foi encontrado.
+                    Nenhum header típico de proxy foi encontrado.
                   </p>
                 )}
 
@@ -549,7 +544,6 @@ export default function WifiCheckPage() {
           </section>
         </div>
 
-        {/* Score de seguranÃ§a */}
         <section
           className={`rounded-xl border bg-slate-900/60 p-4 ${
             scoreResult?.level
@@ -572,12 +566,13 @@ export default function WifiCheckPage() {
               : "border-slate-700/70"
           }`}
         >
-          <h2 className="wifi-section-title mb-2">Score de seguranÃ§a</h2>
+          <h2 className="wifi-section-title mb-2">SCORE DE SEGURANÇA</h2>
 
           {!scoreResult && (
             <p className="text-sm text-slate-200">
-              ApÃ³s rodar os testes, um score heurÃ­stico de 0 a 100 serÃ¡ exibido
-              aqui, combinando HTTPS, proxies e latÃªncia.
+              {
+                "Após rodar os testes, um score heurístico de 0 a 100 será exibido aqui, combinando HTTPS, proxies e latência."
+              }
             </p>
           )}
 
@@ -594,7 +589,7 @@ export default function WifiCheckPage() {
 
               {scoreResult.level && (
                 <p className="text-sm text-slate-200">
-                  NÃ­vel estimado:{" "}
+                  Nível estimado:{" "}
                   <span className="font-semibold">{scoreResult.level}</span>
                 </p>
               )}
@@ -610,14 +605,11 @@ export default function WifiCheckPage() {
           )}
         </section>
 
-        {/* RodapÃ© / Sobre o teste */}
         <footer className="border-t border-slate-800 pt-3 text-center text-xs text-slate-500 space-y-2">
           {lastRunAt && (
             <p className="mb-1">
-              Ãšltima execuÃ§Ã£o:{" "}
-              {lastRunAt.toLocaleString("pt-BR", {
-                hour12: false,
-              })}
+              Última execução:{" "}
+              {lastRunAt.toLocaleString("pt-BR", { hour12: false })}
             </p>
           )}
 
@@ -628,7 +620,7 @@ export default function WifiCheckPage() {
               className="inline-flex items-center gap-1 rounded-full border border-slate-600/80 bg-slate-900/80 px-3 py-1 text-[11px] font-medium text-slate-100 shadow-sm shadow-slate-900/60 transition hover:border-sky-400/80 hover:bg-slate-900"
             >
               <span className="text-xs" aria-hidden="true">
-                ðŸ”
+                {"ℹ️"}
               </span>
               <span>Sobre o teste</span>
             </button>
@@ -637,59 +629,62 @@ export default function WifiCheckPage() {
           {showAbout && (
             <div className="mx-auto mt-1 max-w-2xl rounded-lg border border-slate-700/70 bg-slate-900/80 p-3 text-left text-[11px] leading-relaxed">
               <p className="mb-1 font-semibold text-sky-300">
-                {"O que \u00E9 poss\u00EDvel detectar via p\u00E1gina web"}
+                O que é possível detectar via página web
               </p>
               <ul className="mb-2 list-disc pl-4 text-sky-200">
                 <li>
-                  {"Se a conex\u00E3o est\u00E1 usando HTTPS real (e n\u00E3o um MITM com"}
-                  {"certificado inv\u00E1lido)."}
+                  Se a conexão está usando HTTPS real (e não um MITM com
+                  certificado inválido).
                 </li>
                 <li>
-                  {"Fingerprint parcial do certificado/rota, o que ajuda a"}
-                  {"perceber intercepta\u00E7\u00F5es ou proxies transparentes."}
+                  Fingerprint parcial do certificado/rota, o que ajuda a
+                  perceber interceptações ou proxies transparentes.
                 </li>
                 <li>
-                  {"IP p\u00FAblico aproximado do usu\u00E1rio, permitindo comparar com"}
-                  {"redes conhecidas."}
+                  IP público aproximado do usuário, permitindo comparar com
+                  redes conhecidas.
                 </li>
                 <li>
-                  {"Lat\u00EAncia e comportamento da rota usando chamadas HTTP e"}
-                  {"STUN/WebRTC."}
+                  Latência e comportamento da rota usando chamadas HTTP e
+                  STUN/WebRTC.
                 </li>
                 <li>
-                  {"Presen\u00E7a de proxies transparentes por meio da an\u00E1lise de"}
-                  {"headers como Via e X-Forwarded-*."}
+                  Presença de proxies transparentes por meio da análise de
+                  headers como Via e X-Forwarded-*.
                 </li>
                 <li>
-                  {"Ind\u00EDcios de vazamento de DNS (DNS leak) com requisi\u00E7\u00F5es para"}
-                  {"dom\u00EDnios espec\u00EDficos."}
+                  Indícios de vazamento de DNS (DNS leak) com requisições para
+                  domínios específicos.
                 </li>
               </ul>
 
-              <p className="mb-1 font-semibold text-slate-100">
-                {"O que n\u00E3o \u00E9 poss\u00EDvel apenas pelo browser"}
+              <p className="mb-1 font-semibold text-amber-200">
+                O que não é possível apenas pelo browser
               </p>
               <ul className="list-disc pl-4 text-amber-200">
-                <li>Executar traceroute real a partir do seu dispositivo.</li>
                 <li>
-                  {"Acessar a tabela de roteamento ou configura\u00E7\u00E3o de rede do"}
-                  {"sistema."}
+                  Executar traceroute real a partir do seu dispositivo.
                 </li>
                 <li>
-                  {"Detectar diretamente se o Wi-Fi usa WPA2, WPA3 ou outro"}
-                  {"protocolo."}
+                  Acessar a tabela de roteamento ou configuração de rede do
+                  sistema.
                 </li>
                 <li>
-                  {"Validar toda a superf\u00EDcie de ataque da rede  aqui fazemos"}
-                  {"apenas infer\u00EAncia de risco, n\u00E3o uma auditoria completa."}
+                  Detectar diretamente se o Wi-Fi usa WPA2, WPA3 ou outro
+                  protocolo.
+                </li>
+                <li>
+                  Validar toda a superfície de ataque da rede – aqui fazemos
+                  apenas inferência de risco, não uma auditoria completa.
                 </li>
               </ul>
             </div>
           )}
 
           <p className="pt-1">
-            {"Este painel fornece apenas ind\u00EDcios de seguran\u00E7a da rota. N\u00E3o"
-            {"substitui ferramentas profissionais de an\u00E1lise de tr\u00E1fego."}
+            {
+              "Este painel fornece apenas indícios de segurança da rota. Não substitui ferramentas profissionais de análise de tráfego."
+            }
           </p>
 
           <div className="mt-3">
@@ -703,13 +698,3 @@ export default function WifiCheckPage() {
     </main>
   );
 }
-
-
-
-
-
-
-
-
-
-
